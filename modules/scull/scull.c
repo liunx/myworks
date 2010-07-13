@@ -20,14 +20,24 @@ static struct cdev *scull_dev;
 static ssize_t 
 scull_read(struct file *filp, char __user *user, size_t len, loff_t *offset)
 {
+	ssize_t retval = 0;
 	char buf[32] = "liunx";
 	printk(KERN_ALERT "On scull read...\n");
-	len = 32;
+	len = strlen(buf);
+	if (*offset > len)
+		goto out;
+
+	if (*offset + len > 32)
+		len = 32 - *offset;
+
 	if (copy_to_user(user, buf, len)) {
 		printk(KERN_ALERT "复制到用户空间失败\n");
 	}
 	*offset += len;
-	return len;
+	retval = len;
+
+out:
+	return retval;
 }
 
 static ssize_t
