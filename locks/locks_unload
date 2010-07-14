@@ -1,0 +1,5 @@
+#!/bin/sh
+
+rmmod locks
+
+rm -f /dev/locks0

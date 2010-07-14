@@ -1,0 +1,13 @@
+#!/bin/sh
+
+MODULE="locks"
+DEVICE="locks"
+
+insmod $MODULE.ko || exit 1
+
+MAJOR=$(awk "\$2 == \"$DEVICE\" {print \$1}" /proc/devices)
+
+mknod /dev/${DEVICE}0 c $MAJOR 0
+
+
+
