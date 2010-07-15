@@ -1,0 +1,5 @@
+#!/bin/sh
+
+rmmod ioctl
+
+rm -f /dev/ioctl0
