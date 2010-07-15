@@ -15,7 +15,8 @@
 static unsigned int scull_major = 0;
 static unsigned int scull_minor = 0;
 static dev_t dev;
-static struct semaphore *sem;
+static struct semaphore sem;
+//DECLARE_MUTEX(sem);
 
 static struct cdev *scull_dev;
 
@@ -28,12 +29,12 @@ scull_read(struct file *filp, char __user *user, size_t len, loff_t *offset)
 	len = strlen(buf);
 	if (*offset > len)
 		goto out;
-	if (down_interruptible(sem))
+	if (down_interruptible(&sem))
 		return -ERESTARTSYS;
 
 	if (*offset + len > 32)
 		len = 32 - *offset;
-	up(sem);
+	up(&sem);
 
 	if (copy_to_user(user, buf, len)) {
 		printk(KERN_ALERT "复制到用户空间失败\n");
@@ -66,6 +67,7 @@ scull_open(struct inode *inode, struct file *filp)
 	unsigned int imajor, iminor;
 	struct cdev *dev = NULL;
 	void *data = NULL;
+
 	data = kmalloc(4096 * sizeof(char), GFP_KERNEL);
 	if (data != NULL)
 		filp->private_data = data;
@@ -97,11 +99,10 @@ scull_open(struct inode *inode, struct file *filp)
 			inode->i_gid, inode->i_rdev);
 
 	/* Let's initilized a semaphore */
-	init_MUTEX(sem);
-	if (down_interruptible(sem))
+	if (down_interruptible(&sem))
 		return -ERESTARTSYS;
 	printk(KERN_ALERT "In the critical area.\n");
-	up(sem);
+	up(&sem);
 
 	return 0;
 }
@@ -150,6 +151,9 @@ static int __init scull_init(void)
 	ret = cdev_add(scull_dev, dev, 1);
 	if (ret < 0)
 		printk(KERN_ALERT "添加失败\n");
+
+	init_MUTEX(&sem);
+
 
 	return 0;
 }
