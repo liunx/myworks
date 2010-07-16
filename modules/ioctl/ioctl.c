@@ -7,10 +7,16 @@
 #include <linux/kdev_t.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
+#include <linux/sched.h>
+#include <linux/wait.h>
 #include <asm/uaccess.h>
+
+#include "ioctl.h"
 
 #define IOCTL_COUNT	4
 
+DECLARE_WAIT_QUEUE_HEAD(waitqueue);
+static int waitflags = 0;
 static unsigned int ioctl_major = 0;
 static unsigned int ioctl_minor = 0;
 static dev_t dev;
@@ -36,6 +42,9 @@ ioctl_read(struct file *filp, char __user *user, size_t len, loff_t *offset)
 	*offset += len;
 	retval = len;
 
+	wait_event_interruptible(waitqueue, waitflags != 0);
+	printk(KERN_ALERT "Get the wait events!\n");
+
 out:
 	return retval;
 }
@@ -50,7 +59,9 @@ ioctl_write(struct file *filp, const char __user *user, size_t len, loff_t *offs
 	if (copy_from_user(buf, user, 32)) {
 		printk(KERN_ALERT "从用户区复制数据失败\n");
 	}
+	waitflags = 1;
 
+	wake_up_interruptible(&waitqueue);
 
 	return 32;
 }
@@ -103,12 +114,54 @@ ioctl_close(struct inode *inodep, struct file *filp)
 	return 0;
 }
 
+static int
+ioctl_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long args)
+{
+	int retval = 0;
+	int err = 0;
+	// Verify the magic is right
+	if (_IOC_TYPE(cmd) != IOC_MAGIC)
+		return -ENOTTY;
+	// Verify the number is right
+	if (_IOC_NR(cmd) > IOC_MAXNR)
+		return -ENOTTY;
+	// Verify the data type for read is right
+	if (_IOC_DIR(cmd) & _IOC_READ)
+		err = !access_ok(VERIFY_WRITE, (void __user *)args, _IOC_SIZE(cmd));
+	// Verify the data type for write is right
+	else if (_IOC_DIR(cmd) & _IOC_WRITE)
+		err = !access_ok(VERIFY_READ, (void __user *)args, _IOC_SIZE(cmd));
+	if (err)
+		return -EFAULT;
+	// After everything is done, now let's do response to the cmd
+	switch (cmd) {
+		case IOCTL_HELLO:
+			printk(KERN_ALERT "Hello, Liunx.\n");
+			break;
+		case IOCTL_READ:
+			printk(KERN_ALERT "On ioctl read.\n");
+			break;
+		case IOCTL_WRITE:
+			printk(KERN_ALERT "On ioctl write.\n");
+			break;
+		case IOCTL_WR:
+			printk(KERN_ALERT "On ioctl read write.\n");
+			break;
+		default:
+			break;
+
+	}
+	return retval;
+
+}
+
 static struct file_operations ioctl_fops = {
 	.owner		= THIS_MODULE,
 	.read		= ioctl_read,
 	.write		= ioctl_write,
 	.open		= ioctl_open,
 	.release	= ioctl_close,
+	.ioctl		= ioctl_ioctl,
 
 };
 
