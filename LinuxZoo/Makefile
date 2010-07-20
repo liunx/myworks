@@ -1,4 +1,4 @@
-obj-m += food.o
+obj-m += foodbox.o
 
 all:
 	$(MAKE) -C /media/Liunx/uml/linux-2.6.34 M=`pwd`

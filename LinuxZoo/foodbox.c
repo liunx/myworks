@@ -18,39 +18,118 @@
 #include <linux/proc_fs.h> // we get info from proc fs
 #include <linux/seq_file.h>
 
+#include "foodbox.h"
+
 #define DEV_FOODBOX		"foodbox"
+#define FBOX_AMOUNT		1
+
+static unsigned int foodbox_major = 0;
+static unsigned int foodbox_minor = 0;
+
+static dev_t dev;
+
+static struct foodbox *fbox;
 
 
+/*
+ * eat food -- the animals will do this
+ */
+static ssize_t
+fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
+{
+
+	return 0;
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-static int __init foodbox_init(void)
+/*
+ * add food -- it's the duty of master
+ */
+static ssize_t
+fbox_add(struct file *filp, const char __user *user, size_t len, loff_t offset)
 {
 	return 0;
 }
 
+static int
+fbox_open(struct inode *inode, struct file *file)
+{
+	printk(KERN_ALERT "The value of fbox->foods = %d\n", fbox->foods);
+	return 0;
+}
+
+static int
+fbox_close(struct inode *inode, struct file *file)
+{
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+static struct file_operations fbox_fops = {
+	.owner		= THIS_MODULE,
+	.read		= fbox_eat,
+	.write		= fbox_add,
+	.open		= fbox_open,
+	.release	= fbox_close,
+};
+
 static void __exit foodbox_exit(void)
 {
+	kfree(fbox);
+	unregister_chrdev_region(dev, FBOX_AMOUNT);
 
 }
+
+static int __init foodbox_init(void)
+{
+	int ret;
+
+	dev = MKDEV(foodbox_major, foodbox_minor);
+	if (foodbox_major) {
+		ret = register_chrdev_region(dev, FBOX_AMOUNT, DEV_FOODBOX);
+		if (ret < 0)
+			goto cleanup;
+	}
+	
+	ret = alloc_chrdev_region(&dev, foodbox_minor, FBOX_AMOUNT, DEV_FOODBOX);
+	if (ret < 0)
+		goto cleanup;
+
+	// Now, we can allocate space for our foodbox
+	fbox = kmalloc(sizeof(struct foodbox), GFP_KERNEL);
+	if (!fbox) {
+		ret = -ENOMEM;
+		goto cleanup;
+	}
+	// For safe, we should fill the room full of zero
+	memset(fbox, 0, sizeof(struct foodbox));
+	// let's set fbox private members
+	fbox->foods = MAX_FOOD;
+	cdev_init(&(fbox->cdev), &fbox_fops);
+	fbox->cdev.owner = THIS_MODULE;
+	fbox->cdev.ops = &fbox_fops;
+
+	ret = cdev_add(&fbox->cdev, dev, 1);
+	if (ret)
+		goto cleanup;
+
+	return ret;
+
+cleanup:
+	foodbox_exit();
+	return ret;
+}
+
 
 module_init(foodbox_init);
 module_exit(foodbox_exit);
