@@ -1,0 +1,5 @@
+#!/bin/sh
+
+rmmod foodbox
+
+rm -f /dev/foodbox

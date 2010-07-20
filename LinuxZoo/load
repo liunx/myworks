@@ -1,0 +1,13 @@
+#!/bin/sh
+
+MODULE="foodbox"
+DEVICE="foodbox"
+
+insmod $MODULE.ko || exit 1
+
+MAJOR=$(awk "\$2 == \"$DEVICE\" {print \$1}" /proc/devices)
+
+mknod /dev/${DEVICE} c $MAJOR 0
+
+
+
