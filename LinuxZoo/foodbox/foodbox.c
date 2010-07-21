@@ -37,8 +37,15 @@ static struct foodbox *fbox;
 static ssize_t
 fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
 {
+	struct foodbox *fbox = filp->private_data;
+	printk(KERN_ALERT "I am eating food\n");
+	printk(KERN_ALERT "The amount of food is %d\n", fbox->foods);
+	fbox->foods--;
+	if (fbox->foods < 0)
+		fbox->foods = 0;
 
 	return 0;
+
 }
 
 
@@ -46,8 +53,12 @@ fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
  * add food -- it's the duty of master
  */
 static ssize_t
-fbox_add(struct file *filp, const char __user *user, size_t len, loff_t offset)
+fbox_add(struct file *filp, const char __user *user, size_t len, loff_t *offset)
 {
+	struct foodbox *fbox = filp->private_data;
+	fbox->foods++;
+	if (fbox->foods > MAX_FOOD)
+		fbox->foods = MAX_FOOD;
 	return 0;
 }
 
@@ -55,6 +66,7 @@ static int
 fbox_open(struct inode *inode, struct file *file)
 {
 	printk(KERN_ALERT "The value of fbox->foods = %d\n", fbox->foods);
+	file->private_data = fbox;
 	return 0;
 }
 
