@@ -36,17 +36,19 @@ static struct foodbox *fbox;
 static ssize_t
 fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
 {
-	struct foodbox *fbox = filp->private_data;
-	printk(KERN_ALERT "I am eating food\n");
-	printk(KERN_ALERT "The amount of food is %d\n", fbox->foods);
-	fbox->foods--;
-	if (fbox->foods < 0)
-		fbox->foods = 0;
 
 	return 0;
 
 }
 
+static void
+add_food(struct food *fd)
+{
+
+	if (fbox->food == NULL)
+		fbox->food = fd; // We add the first food
+}
+	
 
 /*
  * add food -- it's the duty of master
@@ -56,7 +58,32 @@ fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
 static ssize_t
 fbox_add(struct file *filp, const char __user *user, size_t len, loff_t *offset)
 {
-	return 0;
+	int retval = -ENOMEM;
+	int fsize = sizeof(struct food);
+	// We get a complete struct food
+	struct food *food = kmalloc(fsize, GFP_KERNEL);
+	if (!food)
+		return -ENOMEM;
+	// OK, if we get the space, we use it to store 
+	// the data from user space
+	if (len > fsize)
+		len = fsize;
+
+	if (copy_from_user(food, user, len)) {
+		printk(KERN_ALERT "Failed copy from user space!\n");
+		retval = -EFAULT;
+		goto out;
+	}
+	// if everything is ok
+	printk(KERN_ALERT "food->name = %s, food->weight = %d, food->time = %d\n", 
+	       food->name, food->weight, food->time);
+	fbox->food = food;
+
+	*offset += len;
+	retval = len;
+out:
+
+	return retval;
 }
 
 /*
@@ -116,7 +143,6 @@ static int __init foodbox_init(void)
 	memset(fbox, 0, sizeof(struct foodbox));
 
 	// let's set fbox private members
-	fbox->foods = 0;
 	fbox->food = NULL;
 	cdev_init(&(fbox->cdev), &fbox_fops);
 	fbox->cdev.owner = THIS_MODULE;

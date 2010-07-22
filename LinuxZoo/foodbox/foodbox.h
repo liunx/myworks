@@ -1,6 +1,7 @@
 #ifndef __FOODBOX_H
 #define __FOODBOX_H
 #include <linux/cdev.h>
+#include <linux/list.h>
 
 #define VOLUME	32
 
@@ -8,8 +9,7 @@ struct food {
 	char name[64]; // The food name, bone, cookie or meat
 	int weight; // how much the food is
 	int time; // how long the food is store
-	struct food *prev;
-	struct food *next;
+	struct list_head list; // double list
 };
 
 struct foodbox {
