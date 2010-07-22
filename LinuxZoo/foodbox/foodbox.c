@@ -27,7 +27,6 @@ static unsigned int foodbox_major = 0;
 static unsigned int foodbox_minor = 0;
 
 static dev_t dev;
-
 static struct foodbox *fbox;
 
 
@@ -51,22 +50,22 @@ fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
 
 /*
  * add food -- it's the duty of master
+ * and the master can put many kinds food
+ * like bone, cookie, meat etc.
  */
 static ssize_t
 fbox_add(struct file *filp, const char __user *user, size_t len, loff_t *offset)
 {
-	struct foodbox *fbox = filp->private_data;
-	fbox->foods++;
-	if (fbox->foods > MAX_FOOD)
-		fbox->foods = MAX_FOOD;
 	return 0;
 }
 
+/*
+ * In fact, we do nothing in open function
+ */
 static int
 fbox_open(struct inode *inode, struct file *file)
 {
-	printk(KERN_ALERT "The value of fbox->foods = %d\n", fbox->foods);
-	file->private_data = fbox;
+	printk(KERN_ALERT "The value of fbox->foods = %d\n", fbox->volume);
 	return 0;
 }
 
@@ -75,17 +74,6 @@ fbox_close(struct inode *inode, struct file *file)
 {
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 static struct file_operations fbox_fops = {
 	.owner		= THIS_MODULE,
@@ -123,10 +111,13 @@ static int __init foodbox_init(void)
 		ret = -ENOMEM;
 		goto cleanup;
 	}
+
 	// For safe, we should fill the room full of zero
 	memset(fbox, 0, sizeof(struct foodbox));
+
 	// let's set fbox private members
-	fbox->foods = MAX_FOOD;
+	fbox->foods = 0;
+	fbox->food = NULL;
 	cdev_init(&(fbox->cdev), &fbox_fops);
 	fbox->cdev.owner = THIS_MODULE;
 	fbox->cdev.ops = &fbox_fops;
