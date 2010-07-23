@@ -29,6 +29,28 @@ static unsigned int foodbox_minor = 0;
 static dev_t dev;
 static struct foodbox *fbox;
 
+/*
+ * delete the food structure from list
+ */
+static void
+get_food(void)
+{
+	struct food *food = NULL;
+	struct list_head *ptr = NULL;
+	ptr = &fbox->food->list;
+	if (fbox->food->list.prev == fbox->food->list.next
+			== NULL) {
+		printk(KERN_ALERT "Oh my god, there's no food!\n");
+		return;
+	}
+	// Or we add the food in the tail 
+	printk(KERN_ALERT "Get a food\n");
+	food = list_entry(ptr, struct food, list);
+	printk(KERN_ALERT "Name: %s, Weight: %d, Time: %d\n",
+			food->name, food->weight, food->time);
+	list_del(&fbox->food->list);
+}
+
 
 /*
  * eat food -- the animals will do this
@@ -36,20 +58,29 @@ static struct foodbox *fbox;
 static ssize_t
 fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
 {
+	get_food();
 
 	return 0;
 
 }
 
+/*
+ * add the food structure to the list
+ */
 static void
 add_food(struct food *fd)
 {
-
-	if (fbox->food == NULL)
+	INIT_LIST_HEAD(&fd->list);
+	if (fbox->food == NULL) {
+		printk(KERN_ALERT "Add the first food...\n");
 		fbox->food = fd; // We add the first food
+		return;
+	}
+	// Or we add the food in the tail 
+	printk(KERN_ALERT "Add the food to the tail...\n");
+	list_add_tail(&fd->list, &fbox->food->list);
 }
 	
-
 /*
  * add food -- it's the duty of master
  * and the master can put many kinds food
@@ -77,7 +108,7 @@ fbox_add(struct file *filp, const char __user *user, size_t len, loff_t *offset)
 	// if everything is ok
 	printk(KERN_ALERT "food->name = %s, food->weight = %d, food->time = %d\n", 
 	       food->name, food->weight, food->time);
-	fbox->food = food;
+	add_food(food);
 
 	*offset += len;
 	retval = len;
