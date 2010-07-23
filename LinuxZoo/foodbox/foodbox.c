@@ -37,18 +37,26 @@ get_food(void)
 {
 	struct food *food = NULL;
 	struct list_head *ptr = NULL;
-	ptr = &fbox->food->list;
-	if (fbox->food->list.prev == fbox->food->list.next
-			== NULL) {
+	struct list_head *tmp = NULL;
+	if (fbox->food == NULL) {
 		printk(KERN_ALERT "Oh my god, there's no food!\n");
 		return;
 	}
 	// Or we add the food in the tail 
-	printk(KERN_ALERT "Get a food\n");
-	food = list_entry(ptr, struct food, list);
-	printk(KERN_ALERT "Name: %s, Weight: %d, Time: %d\n",
-			food->name, food->weight, food->time);
-	list_del(&fbox->food->list);
+	printk(KERN_ALERT "list all of  food\n");
+	list_for_each(ptr, &fbox->food->list) {
+		food = list_entry(ptr, struct food, list);
+		if (food == NULL) {
+			printk(KERN_ALERT "There's no food.\n");
+			return;
+		}
+		printk(KERN_ALERT "Name: %s, Weight: %d, Time: %d\n",
+				food->name, food->weight, food->time);
+		//list_del(&food->list);
+		//kfree(food);
+	}
+//	list_del(&food->list);
+//	kfree(food);
 }
 
 
