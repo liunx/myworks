@@ -17,6 +17,7 @@
 #include <asm/uaccess.h>
 #include <linux/proc_fs.h> // we get info from proc fs
 #include <linux/seq_file.h>
+#include <linux/semaphore.h>
 
 #include "foodbox.h"
 
@@ -28,37 +29,6 @@ static unsigned int foodbox_minor = 0;
 
 static dev_t dev;
 static struct foodbox *fbox;
-
-/*
- * delete the food structure from list
- */
-static void
-get_food(void)
-{
-	struct food *food = NULL;
-	struct list_head *ptr = NULL;
-	struct list_head *tmp = NULL;
-	if (list_empty(&fbox->list)) {
-		printk(KERN_ALERT "Oh my god, there's no food!\n");
-		return;
-	}
-	// Or we add the food in the tail 
-	printk(KERN_ALERT "list all of  food\n");
-	list_for_each_safe(ptr, tmp, &fbox->list) {
-		food = list_entry(ptr, struct food, list);
-		if (food == NULL) {
-			printk(KERN_ALERT "There's no food.\n");
-			return;
-		}
-		printk(KERN_ALERT "Name: %s, Weight: %d, Time: %d\n",
-				food->name, food->weight, food->time);
-		list_del(ptr);
-		kfree(food);
-		// We just eat one per time
-		break;
-	}
-
-}
 
 /*
  * eat food -- the animals will do this
@@ -74,29 +44,42 @@ fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
 	if (len < fsize)
 		len = fsize;
 	if (list_empty(&fbox->list)) {
+#ifdef DEBUG
 		printk(KERN_ALERT "Oh my god, there's no food!\n");
+#endif
 		retval = 0;
 		goto out;
 	}
 	// Or we add the food in the tail 
+#ifdef DEBUG
 	printk(KERN_ALERT "list all of  food\n");
+#endif
+	if (down_interruptible(&fbox->sem))
+		return -ERESTARTSYS;
 	list_for_each_safe(ptr, tmp, &fbox->list) {
 		food = list_entry(ptr, struct food, list);
 		if (food == NULL) {
+#ifdef DEBUG
 			printk(KERN_ALERT "There's no food.\n");
+#endif
 			retval = 0;
 			goto out;
 		}
+#ifdef DEBUG
 		printk(KERN_ALERT "Name: %s, Weight: %d, Time: %d\n",
 				food->name, food->weight, food->time);
+#endif
 		list_del(ptr);
 		//kfree(food);
 		// We just eat one per time
+		fbox->volume--;
 		break;
 	}
 
 	if (copy_to_user(user, food, fsize)) {
+#ifdef DEBUG
 		printk(KERN_ALERT "Failed copy to user space!\n");
+#endif
 		retval = -EFAULT;
 		goto out;
 	}
@@ -106,6 +89,7 @@ fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
 	*offset = fsize;
 	retval = fsize;
 out:
+	up(&fbox->sem);
 	return retval;
 
 }
@@ -117,8 +101,11 @@ static void
 add_food(struct food *fd)
 {
 	// we add the food in the tail 
+#ifdef DEBUG
 	printk(KERN_ALERT "Add the food to the tail...\n");
+#endif
 	list_add_tail(&fd->list, &fbox->list);
+	fbox->volume++;
 }
 	
 /*
@@ -139,21 +126,28 @@ fbox_add(struct file *filp, const char __user *user, size_t len, loff_t *offset)
 	// the data from user space
 	if (len > fsize)
 		len = fsize;
+	if (down_interruptible(&fbox->sem))
+		return -ERESTARTSYS;
 
 	if (copy_from_user(food, user, len)) {
+#ifdef DEBUG
 		printk(KERN_ALERT "Failed copy from user space!\n");
+#endif
 		retval = -EFAULT;
 		goto out;
 	}
 	// if everything is ok
+#ifdef DEBUG
 	printk(KERN_ALERT "food->name = %s, food->weight = %d, food->time = %d\n", 
 	       food->name, food->weight, food->time);
+#endif
 	add_food(food);
 
 	*offset += len;
 	retval = len;
 out:
 
+	up(&fbox->sem);
 	return retval;
 }
 
@@ -215,6 +209,8 @@ static int __init foodbox_init(void)
 
 	// let's set fbox private members
 	INIT_LIST_HEAD(&fbox->list);
+	fbox->volume = 0;
+	init_MUTEX(&fbox->sem);
 	cdev_init(&(fbox->cdev), &fbox_fops);
 	fbox->cdev.owner = THIS_MODULE;
 	fbox->cdev.ops = &fbox_fops;

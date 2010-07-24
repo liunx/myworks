@@ -14,6 +14,7 @@ struct food {
 
 struct foodbox {
 	int volume; // how much food the foodbox can store
+	struct semaphore sem; // keep our data operation safe
 	struct cdev cdev;
 	// we use the list to connect with food structure
 	struct list_head list; 
