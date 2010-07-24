@@ -38,13 +38,13 @@ get_food(void)
 	struct food *food = NULL;
 	struct list_head *ptr = NULL;
 	struct list_head *tmp = NULL;
-	if (fbox->food == NULL) {
+	if (list_empty(&fbox->list)) {
 		printk(KERN_ALERT "Oh my god, there's no food!\n");
 		return;
 	}
 	// Or we add the food in the tail 
 	printk(KERN_ALERT "list all of  food\n");
-	list_for_each(ptr, &fbox->food->list) {
+	list_for_each_safe(ptr, tmp, &fbox->list) {
 		food = list_entry(ptr, struct food, list);
 		if (food == NULL) {
 			printk(KERN_ALERT "There's no food.\n");
@@ -52,13 +52,13 @@ get_food(void)
 		}
 		printk(KERN_ALERT "Name: %s, Weight: %d, Time: %d\n",
 				food->name, food->weight, food->time);
-		//list_del(&food->list);
-		//kfree(food);
+		list_del(ptr);
+		kfree(food);
+		// We just eat one per time
+		break;
 	}
-//	list_del(&food->list);
-//	kfree(food);
-}
 
+}
 
 /*
  * eat food -- the animals will do this
@@ -66,9 +66,47 @@ get_food(void)
 static ssize_t
 fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
 {
-	get_food();
+	int retval = -ENOMEM;
+	int fsize = sizeof(struct food);
+	struct food *food = NULL;
+	struct list_head *ptr = NULL;
+	struct list_head *tmp = NULL;
+	if (len < fsize)
+		len = fsize;
+	if (list_empty(&fbox->list)) {
+		printk(KERN_ALERT "Oh my god, there's no food!\n");
+		retval = 0;
+		goto out;
+	}
+	// Or we add the food in the tail 
+	printk(KERN_ALERT "list all of  food\n");
+	list_for_each_safe(ptr, tmp, &fbox->list) {
+		food = list_entry(ptr, struct food, list);
+		if (food == NULL) {
+			printk(KERN_ALERT "There's no food.\n");
+			retval = 0;
+			goto out;
+		}
+		printk(KERN_ALERT "Name: %s, Weight: %d, Time: %d\n",
+				food->name, food->weight, food->time);
+		list_del(ptr);
+		//kfree(food);
+		// We just eat one per time
+		break;
+	}
 
-	return 0;
+	if (copy_to_user(user, food, fsize)) {
+		printk(KERN_ALERT "Failed copy to user space!\n");
+		retval = -EFAULT;
+		goto out;
+	}
+
+	kfree(food);
+
+	*offset = fsize;
+	retval = fsize;
+out:
+	return retval;
 
 }
 
@@ -78,15 +116,9 @@ fbox_eat(struct file *filp, char __user *user, size_t len, loff_t *offset)
 static void
 add_food(struct food *fd)
 {
-	INIT_LIST_HEAD(&fd->list);
-	if (fbox->food == NULL) {
-		printk(KERN_ALERT "Add the first food...\n");
-		fbox->food = fd; // We add the first food
-		return;
-	}
-	// Or we add the food in the tail 
+	// we add the food in the tail 
 	printk(KERN_ALERT "Add the food to the tail...\n");
-	list_add_tail(&fd->list, &fbox->food->list);
+	list_add_tail(&fd->list, &fbox->list);
 }
 	
 /*
@@ -131,7 +163,7 @@ out:
 static int
 fbox_open(struct inode *inode, struct file *file)
 {
-	printk(KERN_ALERT "The value of fbox->foods = %d\n", fbox->volume);
+//	printk(KERN_ALERT "The value of fbox->foods = %d\n", fbox->volume);
 	return 0;
 }
 
@@ -182,7 +214,7 @@ static int __init foodbox_init(void)
 	memset(fbox, 0, sizeof(struct foodbox));
 
 	// let's set fbox private members
-	fbox->food = NULL;
+	INIT_LIST_HEAD(&fbox->list);
 	cdev_init(&(fbox->cdev), &fbox_fops);
 	fbox->cdev.owner = THIS_MODULE;
 	fbox->cdev.ops = &fbox_fops;
