@@ -52,7 +52,7 @@ static void *my_seq_next(struct seq_file *s, void *v, loff_t *pos)
 	unsigned long *tmp_v = (unsigned long *)v;
 	printk(KERN_INFO "In my_seq_next...\n");
 	(*tmp_v)++;
-	(*pos)++;
+	//(*pos)++;
 	return NULL;
 }
 

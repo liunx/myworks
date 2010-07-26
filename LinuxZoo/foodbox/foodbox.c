@@ -175,6 +175,72 @@ static struct file_operations fbox_fops = {
 	.release	= fbox_close,
 };
 
+/*
+ * Here, let's add proc file system
+ */
+static void 
+*fbox_proc_start(struct seq_file *s, loff_t *pos)
+{
+	static unsigned long counter = 0;
+	if (*pos == 0) {
+		return &counter;
+	} else {
+		*pos = 0;
+		return NULL;
+	}
+}
+
+static void 
+*fbox_proc_next(struct seq_file *s, void *v, loff_t *pos)
+{
+	unsigned long *tmp_v = (unsigned long *)v;
+	(*tmp_v)++;
+	return NULL;
+}
+
+static void 
+fbox_proc_stop(struct seq_file *s, void *v)
+{
+	/* do nothing */
+}
+
+static int
+fbox_proc_show(struct seq_file *s, void *v)
+{
+	//loff_t *spos = (loff_t *) v;
+	//seq_printf(s, "%Ld\n", *spos);
+	// now, print the food info
+	seq_printf(s, "The number of food is %d\n", fbox->volume);
+
+	return 0;
+}
+
+static struct seq_operations fbox_seq_ops = {
+	.start	= fbox_proc_start,
+	.next	= fbox_proc_next,
+	.stop	= fbox_proc_stop,
+	.show	= fbox_proc_show
+};
+
+/*
+ * This function is called when the /proc file is open
+ */
+static int
+proc_open(struct inode *inode, struct file *file)
+{
+	return seq_open(file, &fbox_seq_ops);
+}
+
+static struct file_operations proc_file_ops = {
+	.owner		= THIS_MODULE,
+	.open		= proc_open,
+	.read		= seq_read,
+	.llseek		= seq_lseek,
+	.release	= seq_release
+};
+
+
+
 static void __exit foodbox_exit(void)
 {
 	kfree(fbox);
@@ -185,6 +251,7 @@ static void __exit foodbox_exit(void)
 static int __init foodbox_init(void)
 {
 	int ret;
+	struct proc_dir_entry *entry;
 
 	dev = MKDEV(foodbox_major, foodbox_minor);
 	if (foodbox_major) {
@@ -218,6 +285,11 @@ static int __init foodbox_init(void)
 	ret = cdev_add(&fbox->cdev, dev, 1);
 	if (ret)
 		goto cleanup;
+	// create the proc fs
+	entry = create_proc_entry("foodbox", 0, NULL);
+	if (entry)
+		entry->proc_fops = &proc_file_ops;
+	
 
 	return ret;
 
