@@ -4,8 +4,29 @@
 import curses
 import time
 
+
+Pos = 20
+def draw_map():
+    Map = [
+            [1, 1, 1, 1],
+            [1, 0, 0, 1],
+            [1, 0, 0, 1],
+            [1, 1, 1, 1]
+            ]
+    for i in range(4):
+        for j in range(4):
+            if Map[i][j] == 1:
+                stdscr.addch(i + Pos, j + Pos, ord('#'))
+
+# Check whether we hit the barrier
+def get_collision(y, x):
+    if y == 20:
+        y = 20
+
 def main(win):
     global stdscr
+    global Map 
+
     stdscr = win
 
     if curses.has_colors():
@@ -19,22 +40,40 @@ def main(win):
     x = 0
     y = 0
     while True:
-        stdscr.addch(x, y, ord('#'))
+        # We should get the border of screen
+        max_y, max_x = stdscr.getmaxyx()
+        draw_map()
+
+
+        stdscr.addch(y, x, ord('#'))
         ch = stdscr.getch()
         if ch == ord('q') or ch == ord('Q'):
             return
-        elif ch == curses.KEY_UP:
-            x += 1
         elif ch == curses.KEY_DOWN:
-            x -= 1
-        elif ch == curses.KEY_LEFT:
             y += 1
-        elif ch == curses.KEY_RIGHT:
+            if (y > max_y - 1):
+                y = max_y - 1
+            get_collision(y, x)
+            stdscr.erase()
+        elif ch == curses.KEY_UP:
             y -= 1
-        stdscr.erase()
+            if (y < 0):
+                y = 0
+            stdscr.erase()
+        elif ch == curses.KEY_RIGHT:
+            x += 1
+            if (x > max_x - 1):
+                x = max_x - 1
+            stdscr.erase()
+        elif ch == curses.KEY_LEFT:
+            x -= 1
+            if (x < 0):
+                x = 0
+
+            stdscr.erase()
         stdscr.refresh()
 
-        curses.napms(50)
+        curses.napms(10)
 
 curses.wrapper(main)
 
