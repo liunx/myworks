@@ -5,7 +5,7 @@ import curses
 import time
 
 
-Pos = 10
+Pos = 5
 Map = []
 speed_y = 1
 speed_x = 1
@@ -24,7 +24,7 @@ def draw_map():
     for i in range(8):
         for j in range(8):
             if Map[i][j] == 1:
-                stdscr.addch(i + Pos, j + Pos, ord('#'))
+                stdscr.addch(i + Pos, j + Pos + 1, ord('#'))
 
 def collision_check(y, x):
     chyx = stdscr.inch(y, x)
@@ -42,15 +42,13 @@ def auto_run(y, x):
     x += speed_x
     if (y >= max_y - 1) or (y <= 0):
         speed_y = -speed_y
-    elif collision_check(y, x):
+    elif collision_check(y + speed_y, x):
         speed_y = -speed_y
-        y += speed_y
 
     if (x >= max_x - 1) or (x <= 0):
         speed_x = -speed_x
-    elif collision_check(y, x):
+    elif collision_check(y, x + speed_x):
         speed_x = -speed_x
-        x += speed_x
 
     return (y, x)
 
