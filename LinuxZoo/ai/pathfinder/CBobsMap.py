@@ -29,9 +29,9 @@ class CBobsMap:
     # index into the array which is the start point
     _iStartX = 14
     _iStartY = 7
-    # the finish point
+    # the finish point -- exit 
     _iEndX = 0
-    _iEndY = 0
+    _iEndY = 2
 
     # we need a param to get curses object and y,x cordinates
     def draw_map(self, stdscr):
@@ -86,6 +86,12 @@ class CBobsMap:
 
             # let's track the man moves
             self._UserMap[posY][posX] = 1
+            # If we find the exit, then we just return
+            fitness = abs(posY - self._iEndY) + abs(posX - self._iEndX)
+            if fitness == 0:
+                return 0
+        # At last, return 
+        return fitness
 
     def draw_track(self, stdscr):
         for i in range(self._iMapHeight):

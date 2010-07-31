@@ -4,6 +4,7 @@
 from CBobsMap import CBobsMap
 from CgaBob import CgaBob
 import curses
+import time
 
 def main(win):
     global stdscr
@@ -21,7 +22,7 @@ def main(win):
     mymap = CBobsMap()
     myBob = CgaBob()
 
-    myBob.CreateGenes(1000)
+    myBob.CreateGenes(900)
 
     directions = myBob.Decode()
 
@@ -31,10 +32,14 @@ def main(win):
             return
         #stdscr.erase()
         mymap.draw_map(stdscr) 
-        mymap.TestRoute(directions)
+        res = mymap.TestRoute(directions)
         mymap.draw_track(stdscr)
 
         curses.napms(100)
         stdscr.refresh()
+        if res == 0:
+            break
+
+    time.sleep(10)
 
 curses.wrapper(main)
