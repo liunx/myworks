@@ -92,13 +92,16 @@ class CBobsMap:
             # let's track the man moves
             self._UserMap[posY][posX] = 1
             # If we find the exit, then we just return
-            self._fitness = abs(posY - self._iEndY) + abs(posX - self._iEndX)
-            if self._fitness == 0:
+            a = float(abs(posY - self._iEndY))
+            b = float(abs(posX - self._iEndX))
+            self._fitness = 1 / (a + b + 1)
+            if self._fitness == 1:
                 # If we get a solution, the less steps the better
                 return (self._fitness, i, self._UserMap)
         # At last, the more small of self._fitness, the better
         return (self._fitness, i, self._UserMap)
 
+    # Show the track of solution
     def draw_track(self, stdscr):
         for i in range(self._iMapHeight):
             for j in range(self._iMapWidth):

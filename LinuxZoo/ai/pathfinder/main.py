@@ -24,7 +24,8 @@ def main(win):
     mymap = CBobsMap()
     myBob = CgaBob()
 
-    myBob.FindPath(mymap)
+    #myBob.FindPath(mymap)
+    myBob.Epoch(mymap)
 
 
     while Res:
