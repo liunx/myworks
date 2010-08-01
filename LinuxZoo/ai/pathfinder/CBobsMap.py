@@ -33,6 +33,8 @@ class CBobsMap:
     _iEndX = 0
     _iEndY = 2
 
+    _fitness = 0
+
     # we need a param to get curses object and y,x cordinates
     def draw_map(self, stdscr):
         for i in range(10):
@@ -50,6 +52,9 @@ class CBobsMap:
     def TestRoute(self, track):
         posY = self._iStartY
         posX = self._iStartX
+
+        # before we use the _UserMap, we should clear it firstly
+        self._UserMap = [[0 for col in range(15)] for row in range(10)]
 
         for i in range(len(track)):
             direction = track[i]
@@ -82,16 +87,17 @@ class CBobsMap:
                 else:
                     posX -= 1
             else:
-                continue
+                break
 
             # let's track the man moves
             self._UserMap[posY][posX] = 1
             # If we find the exit, then we just return
-            fitness = abs(posY - self._iEndY) + abs(posX - self._iEndX)
-            if fitness == 0:
-                return 0
-        # At last, return 
-        return fitness
+            self._fitness = abs(posY - self._iEndY) + abs(posX - self._iEndX)
+            if self._fitness == 0:
+                # If we get a solution, the less steps the better
+                return (self._fitness, i, self._UserMap)
+        # At last, the more small of self._fitness, the better
+        return (self._fitness, i, self._UserMap)
 
     def draw_track(self, stdscr):
         for i in range(self._iMapHeight):

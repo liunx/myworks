@@ -9,6 +9,8 @@ import time
 def main(win):
     global stdscr
     stdscr = win
+
+    Res = True
     # It's used to store the directions
     directions = []
     if curses.has_colors():
@@ -22,24 +24,23 @@ def main(win):
     mymap = CBobsMap()
     myBob = CgaBob()
 
-    myBob.CreateGenes(900)
+    myBob.FindPath(mymap)
 
-    directions = myBob.Decode()
 
-    while True:
+    while Res:
         ch = stdscr.getch()
         if ch == ord('q') or ch == ord('Q'):
             return
         #stdscr.erase()
         mymap.draw_map(stdscr) 
-        res = mymap.TestRoute(directions)
         mymap.draw_track(stdscr)
 
         curses.napms(100)
         stdscr.refresh()
-        if res == 0:
-            break
 
-    time.sleep(10)
+        Res = False
+
+    time.sleep(100)
+
 
 curses.wrapper(main)
