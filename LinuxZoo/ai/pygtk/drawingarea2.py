@@ -20,9 +20,13 @@ def main():
     drawing_area.set_size_request(200, 200)
     vbox.pack_start(drawing_area, True, True, 0)
 
+    # now let's draw a point
+    style = drawing_area.get_style()
+    gc = style.fg_gc[gtk.STATE_NORMAL]
     drawing_area.show()
-
     window.show()
+    drawing_area.window.draw_point(gc, 20, 30)
+
 
     gtk.main()
 
