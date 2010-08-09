@@ -74,7 +74,8 @@ class CmapTSP:
         self.drawing_area.window.draw_arc(self.gc, False, x, y, 10, 
                                           10, 0, 360 * 64)
         #self.pangoplayout.set_text("arcs %d %d " % (x, y))
-        #self.drawing_area.window.draw_layout(self.gc, x + 5, y + 5, self.pangoplayout)
+        #self.drawing_area.window.draw_layout(self.gc, x + 5, y + 5, \
+        #        self.pangoplayout)
 
     def draw_line(self, xs, ys, xe, ye):
         self.drawing_area.window.draw_line(self.gc, xs, ys, xe, ye)
@@ -113,13 +114,25 @@ class CmapTSP:
     #   the better.
     #----------------------------------------------------------------------
     def CalculateBestPossibleRoute(self):
-        self.BestPossibleFitness = 0
-        for city in range(len(self.city_cords)):
+        self.BestPossibleFitness = 999999
+        for count in range(len(self.total_genes)):
+            Fitness = 0
+            for city in range(len(self.city_cords) - 2):
+                self.BestPossibleFitness += self.CalculateA2B(self.city_cords\
+                        [self.total_genes[count][city]], self.city_cords[self\
+                        .total_genes[count][city + 1]])
+
+            # at last, we should add the last and first distances
             self.BestPossibleFitness += self.CalculateA2B(self.city_cords\
-                    [city], self.city_cords[city + 1])
-        # at last, we should add the last and first distances
-        self.BestPossibleFitness += self.CalculateA2B(self.city_cords\
-                [len(self.city_cords) - 1], self.city_cords[0])
+                    [self.total_genes[count][len(self.city_cords) - 2]], \
+                    self.city_cords[self.total_genes[count][0]])
+
+            # Then get a better fitness
+            if Fitness < self.BestPossibleFitness:
+                self.BestPossibleFitness = Fitness
+                self.BestFitGene = self.total_genes[count]
+                #print 'The self.BestFitGene is: '
+                #print self.BestFitGene
 
 
     #------------------- Calculate Distance -------------------------------
@@ -137,7 +150,7 @@ class CmapTSP:
     def NewPopulations(self):
         # We can try to generate one genomes
         # we need to generate a lot of genes to get the most fit one
-        self.amount_genes = 1000
+        self.amount_genes = 99999
         self.total_genes = [0] * self.amount_genes 
         for amount in range(self.amount_genes):
             self.genome = []
@@ -179,8 +192,40 @@ class CmapTSP:
     def StartTour(self):
         # First, generate a new population
         self.NewPopulations()
+        self.CalculateBestPossibleRoute()
 
-        self.DrawTour(self.total_genes[0])
+
+        self.DrawTour(self.BestFitGene)
+
+    ############################# CrossoverPMX #############################
+    #   We use this method to exchange genes between parents
+    ########################################################################
+    def CrossoverPMX(self, mum, dad):
+        self.CrossoverPMX_rate = 0.1
+        if (random.random > self.CrossoverPMX_rate) or (num == dad):
+            # We do nothing about them
+            return
+        randpos = random.randint(0, len(mum) - 1)
+        tmpmum = mum[:randpos]
+        tmpdad = dad[:randpos]
+        mum[:randpos] = tmpdad
+        dad[:randpos] = tmpmum
+        self.SolveDup(tmpdad, mum)
+        self.SolveDup(tmpmum, dad)
+        # We should check the duplicate matches, and solve the conflict
+    ######################## Check Duplication #############################
+    def SolveDup(self, tmp, parent):
+        dupnum = 0
+        tmplist = []
+        for i in range(len(tmp)):
+            tmplist = parent[:len(tmp)]
+            dupnum = tmplist[i]
+            if parent[len(tmp):].count(dupnum) == 1:
+                # if we find the duplicate one
+                parent[len(tmp):][parent[len(tmp):].index(dupnum)] = tmp[i]
+
+
+        
 
 
 
