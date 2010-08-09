@@ -4,6 +4,7 @@
 import pygtk
 pygtk.require('2.0')
 import gtk
+from math import *
 
 class HelloWorld:
 
@@ -65,15 +66,29 @@ class HelloWorld:
 
     def button_press_event(self, widget, event):
         self.draw_arcs(int(event.x), int(event.y))
+        self.draw_circle()
 
     def draw_arcs(self, x, y):
         self.drawing_area.window.draw_arc(self.gc, False, x, y, 10, 
                                           10, 0, 360 * 64)
-        self.pangoplayout.set_text("arcs %d %d " % (x, y))
-        self.drawing_area.window.draw_layout(self.gc, x + 5, y + 5, self.pangoplayout)
+        #self.pangoplayout.set_text("arcs %d %d " % (x, y))
+        #self.drawing_area.window.draw_layout(self.gc, x + 5, y + 5, self.pangoplayout)
 
     def draw_line(self, xs, ys, xe, ye):
         self.drawing_area.window.draw_line(self.gc, xs, ys, xe, ye)
+
+    def draw_circle(self):
+        self.NumCities = 12
+        margin = 500
+        radius = 300
+        SegmentSize = 2 * pi / self.NumCities
+        angle = 0
+        while angle < 2 * pi:
+            Cx = radius * sin(angle) + 500
+            Cy = radius * cos(angle) + 400
+            self.draw_arcs(int(Cx), int(Cy))
+            angle += SegmentSize
+
 
     def main(self):
         gtk.main()
