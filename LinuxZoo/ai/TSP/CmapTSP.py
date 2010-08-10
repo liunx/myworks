@@ -49,7 +49,11 @@ class CmapTSP:
 
     def hello(self, widget, data = None):
         #print self.city_cords
+        self.Reset()
         self.StartTour()
+
+        self.DrawTour(self.BestFitGene)
+
 
 
     def delete_event(self, widget, event, data = None):
@@ -150,7 +154,7 @@ class CmapTSP:
     def NewPopulations(self):
         # We can try to generate one genomes
         # we need to generate a lot of genes to get the most fit one
-        self.amount_genes = 99999
+        self.amount_genes = 100
         self.total_genes = [0] * self.amount_genes 
         for amount in range(self.amount_genes):
             self.genome = []
@@ -183,19 +187,44 @@ class CmapTSP:
             self.draw_line(self.city_cords[genome[len(genome) - 1]][0], self.\
                     city_cords[genome[len(genome) - 1]][1], self.city_cords\
                     [genome[0]][0], self.city_cords[genome[0]][1])
-
+    ###################### Reset ############################################
+    # We can store some global variables here
+    #########################################################################
+    def Reset(self):
+        self.iGeneration = 0
 
     #------------------- Start Tour ----------------------------------------
     #   Now, It's time for the saleman to have tour, after many tries,
     #   he will find a best fit one route
     #-----------------------------------------------------------------------
     def StartTour(self):
+
         # First, generate a new population
         self.NewPopulations()
+
+        # let's use a temple list to store the new generation
+        newpopulation = []
+        while len(newpopulation) != self.amount_genes:
+            mum = self.RouletteWheelSelection()
+            dad = self.RouletteWheelSelection()
+            self.CrossoverPMX(mum, dad)
+            # mutate them
+            #
+
+            # add them to new population
+            newpopulation.append(mum)
+            newpopulation.append(dad)
+        
+        # copy into next generation
+        self.total_genes = newpopulation
         self.CalculateBestPossibleRoute()
 
+        self.iGeneration += 1
 
-        self.DrawTour(self.BestFitGene)
+        print self.iGeneration
+        if self.iGeneration == 500:
+            return
+        self.StartTour()
 
     ############################# CrossoverPMX #############################
     #   We use this method to exchange genes between parents
@@ -224,11 +253,14 @@ class CmapTSP:
                 # if we find the duplicate one
                 parent[len(tmp):][parent[len(tmp):].index(dupnum)] = tmp[i]
 
-
-        
-
-
-
+    ###################### RouletteWheelSelection ##########################
+    #   select a member of the population by using roulette wheel selection
+    #   as described in the text.
+    ########################################################################
+    def RouletteWheelSelection(self):
+        # We just pick up a random index in the range
+        num = random.randint(0, self.amount_genes - 1)
+        return self.total_genes[num]
 
     def main(self):
         gtk.main()
