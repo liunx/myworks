@@ -9,6 +9,8 @@
 #
 # Normal rules
 #
+Net/ALP-listings
+.gitignore
 .*
 *.o
 *.o.*
