@@ -113,27 +113,26 @@ char *clean_space(char *line)
 {
 	size_t len = strlen(line);
 	//At least, our buf should not small than the line
-	char buf[len];
+	char *buf = (char *)malloc(len + 1);
 	char *ptr;
 	ptr = line;
 	int i = 0;
 
 	// XXX It's very import to zero the buf
-	bzero(buf, sizeof(buf));
+	memset(buf, 0, len + 1);
 	while (*ptr != '\0') {
 		while (*ptr == ' ') {
 			ptr++;
-			if (*ptr == '\0')
-				return NULL;
+			if (*(ptr + 1) == '\0')
+				break;
 		}
 		buf[i] = *ptr;
 		ptr++;
 		i++;
 
 	}
-	ptr = buf;
 
-	return ptr;
+	return buf;
 }
 
 /*
@@ -143,13 +142,13 @@ char *clean_comment(char *line)
 {
 	size_t len = strlen(line);
 	//At least, our buf should not small than the line
-	char buf[len];
+	char *buf = (char *)malloc(len + 1);
 	char *ptr;
 	ptr = line;
 	int i = 0;
 
 	// XXX It's very import to zero the buf
-	bzero(buf, sizeof(buf));
+	memset(buf, 0, len + 1);
 	while (*ptr != '\0') {
 		if (*ptr == '#')
 			break;
@@ -166,34 +165,51 @@ char *clean_comment(char *line)
 
 int main(int argc, char *argv[])
 {
+	char *ptr;
+	char *ptr2;
+	char buf[1024];
+
 	if (argc < 2) {
 		fprintf(stderr, "Usage: %s string\n", argv[0]);
 		exit(1);
 	}
 
-	char *line = argv[1];
-	char *ptr;
-	char *ptr2;
-	char buf[strlen(line)];
+	//char *line = argv[1];
+	// First we should get the length of string
+	size_t len = strlen(argv[1]);
+	// Then allocation enough room to store the string
+	char *line = (char *)malloc(len + 1);
+	if (!line) {
+		fprintf(stderr, "Failed to allocate a room.!\n");
+		exit(-1);
+	}
+	memset(line, 0, len + 1);
+	strncpy(line, argv[1], len);
+
+	printf("line --> %s\n", line);
 
 	get_word(line);
 	get_number(line);
 	get_comment(line);
 
+	// Do some filt of the line, we do not need space and
+	// comments
 	ptr = clean_comment(line);
+	len = strlen(ptr);
 	bzero(buf, sizeof(buf));
-	strcpy(buf, ptr);
-	ptr = clean_space(buf);
+	strncpy(buf, ptr, len);
+	printf("The buf --> %s\n", buf);
+	ptr2 = clean_space(buf);
 
-	if (ptr)
-		printf("The new line is :%s\n", ptr);
+	if (ptr2)
+		printf("The new line is :%s\n", ptr2);
 
-	bzero(buf, sizeof(buf));
-	strcpy(buf, ptr);
-	ptr = clean_space(buf);
-
-	if (ptr)
-		printf("The new line is :%s\n", ptr);
+	// At last, free the space
+	// Array is a fix memory area, so we can not free the array,
+	// we just can free the pointer to a dynamic memory area, once.
+	//free(buf);
+	free(ptr);
+	free(line);
 
 	return 0;
 }
