@@ -10,8 +10,8 @@
 # Normal rules
 #
 # codeblock file
-*/bin
-*/obj
+Net/newServer/ParseFile/ParseFile/bin
+Net/newServer/ParseFile/ParseFile/obj
 *.cbp
 *.layout
 Net/ALP-listings
