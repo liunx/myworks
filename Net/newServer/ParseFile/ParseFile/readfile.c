@@ -1,5 +1,5 @@
 /*
- * Read file -- Read a file into memory 
+ * Read file -- Read a file into memory
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,7 +11,6 @@
 #include <unistd.h>
 
 #define BUFSIZE	32
-#define FILENAME	"test.conf"
 
 // read_file, read full of file contents and
 // store into buf
@@ -74,19 +73,3 @@ void parse_file(char *buf)
 
 }
 
-int main()
-{
-	char *str1, *str2, *token, *subtoken;
-	char *saveptr1, *saveptr2;
-	int j;
-	char *buf = read_file(FILENAME);
-	if (buf == NULL) {
-		fprintf(stderr, "Failed to get the file.\n");
-		exit(1);
-	}
-	//printf("%s", buf);
-	// OK,next, let's parse the buf 
-	parse_file(buf);
-	return 0;
-	
-}

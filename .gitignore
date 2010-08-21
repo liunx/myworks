@@ -12,8 +12,8 @@
 # codeblock file
 Net/newServer/ParseFile/ParseFile/bin
 Net/newServer/ParseFile/ParseFile/obj
-*.cbp
-*.layout
+#*.cbp
+#*.layout
 Net/ALP-listings
 .gitignore
 .*

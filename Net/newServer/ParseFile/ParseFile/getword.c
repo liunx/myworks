@@ -21,7 +21,7 @@ void get_word(char *line)
 		// We should clear the buf and counter
 		bzero(word, sizeof(word));
 		i = 0;
-		while (('A' <= *ptr && *ptr <= 'Z') || ('a' <= *ptr && 
+		while (('A' <= *ptr && *ptr <= 'Z') || ('a' <= *ptr &&
 		    *ptr <= 'z')) {
 			word[i] = *ptr;
 			i++;
@@ -161,57 +161,5 @@ char *clean_comment(char *line)
 	ptr = buf;
 
 	return ptr;
-}
-
-int main(int argc, char *argv[])
-{
-	char *ptr;
-	char *ptr2;
-	char buf[1024];
-
-	if (argc < 2) {
-		fprintf(stderr, "Usage: %s string\n", argv[0]);
-		exit(1);
-	}
-
-	//char *line = argv[1];
-	// First we should get the length of string
-	size_t len = strlen(argv[1]);
-	// Then allocation enough room to store the string
-	char *line = (char *)malloc(len + 1);
-	if (!line) {
-		fprintf(stderr, "Failed to allocate a room.!\n");
-		exit(-1);
-	}
-	memset(line, 0, len + 1);
-	strncpy(line, argv[1], len);
-
-	printf("line --> %s\n", line);
-
-	get_word(line);
-	get_number(line);
-	get_comment(line);
-
-	// Do some filt of the line, we do not need space and
-	// comments
-	ptr = clean_comment(line);
-	len = strlen(ptr);
-	bzero(buf, sizeof(buf));
-	strncpy(buf, ptr, len);
-	printf("The buf --> %s\n", buf);
-	ptr2 = clean_space(buf);
-
-	if (ptr2)
-		printf("The new line is :%s\n", ptr2);
-
-	// At last, free the space
-	// Array is a fix memory area, so we can not free the array,
-	// we just can free the pointer to a dynamic memory area, once.
-	//free(buf);
-	free(ptr2);
-	free(ptr);
-	free(line);
-
-	return 0;
 }
 

@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1282372025 source:/home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/getword.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1282371258 source:/home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/main.c
+	<stdio.h>
+	<stdlib.h>
+
+1282371995 source:/home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/readfile.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<fcntl.h>
+	<unistd.h>
+
