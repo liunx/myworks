@@ -1,8 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+
+#include "readfile.h"
+#include "getword.h"
+
+#define FILENAME        "test.conf"
 
 int main()
 {
-    printf("Hello world!\n");
-    return 0;
+        char *file;
+        file = read_file(FILENAME);
+        //printf("%s", file);
+        parse_file(file);
+        sleep(100);
+
+        return 0;
 }

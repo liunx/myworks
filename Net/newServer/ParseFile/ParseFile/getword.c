@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "getword.h"
+
 /*
  * get_word -- extract word from a line
  */

@@ -10,7 +10,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define BUFSIZE	32
+#include "readfile.h"
+#include "getword.h"
 
 // read_file, read full of file contents and
 // store into buf
@@ -29,7 +30,7 @@ char *read_file(const char *filename)
 	/* Get infomation about the file */
 	fstat(fd, &file_info);
 	len = file_info.st_size;
-	printf("The length of file is %d\n", len);
+	//printf("The length of file is %d\n", len);
 	/* Make sure the file is an ordinary file. */
 	if (!S_ISREG(file_info.st_mode)) {
 		close(fd);
@@ -55,20 +56,13 @@ void parse_file(char *buf)
 		token = strtok_r(str1, "\n", &saveptr1);
 		if (token == NULL)
 			break;
-		// Now let's parse the value
-		for (str2 = token; ; str2 = NULL) {
-			subtoken = strtok_r(str2, "=", &saveptr2);
-			if (subtoken == NULL)
-				break;
-			printf("-->%s\n", subtoken);
-			if (strcmp(subtoken, "num") == 0) {
-				subtoken = strtok_r(NULL, "=", &saveptr2);
-				printf("The value is %s\n", subtoken);
-				i = atoi(subtoken);
-				printf("The value of i is %d\n", i);
-			}
-
-		}
+		// Now, we get a line, then let's process it with
+		// funcions in getword
+		str1 = clean_comment(token);
+		str2 = clean_space(str1);
+		printf("The newline is %s\n", str2);
+		free(str2);
+		free(str1);
 	}
 
 }
