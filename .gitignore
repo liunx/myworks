@@ -9,6 +9,11 @@
 #
 # Normal rules
 #
+# codeblock file
+*/bin
+*/obj
+*.cbp
+*.layout
 Net/ALP-listings
 .gitignore
 .*
