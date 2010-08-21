@@ -13,7 +13,9 @@
 #define BUFSIZE	32
 #define FILENAME	"test.conf"
 
-char *read_file(const char *filename, size_t *length)
+// read_file, read full of file contents and
+// store into buf
+char *read_file(const char *filename)
 {
 	int fd;
 	struct stat file_info;
@@ -42,11 +44,49 @@ char *read_file(const char *filename, size_t *length)
 	return buffer;
 }
 
+// parse buf into lines
+void parse_file(char *buf)
+{
+	char *str1, *str2, *token, *subtoken;
+	char *saveptr1, *saveptr2;
+	int i, j;
+	int retval;
+	// We need the i to keep loop
+	for (str1 = buf; ; str1 = NULL) {
+		token = strtok_r(str1, "\n", &saveptr1);
+		if (token == NULL)
+			break;
+		// Now let's parse the value
+		for (str2 = token; ; str2 = NULL) {
+			subtoken = strtok_r(str2, "=", &saveptr2);
+			if (subtoken == NULL)
+				break;
+			printf("-->%s\n", subtoken);
+			if (strcmp(subtoken, "num") == 0) {
+				subtoken = strtok_r(NULL, "=", &saveptr2);
+				printf("The value is %s\n", subtoken);
+				i = atoi(subtoken);
+				printf("The value of i is %d\n", i);
+			}
+
+		}
+	}
+
+}
+
 int main()
 {
-	size_t *length;
-	char *buf = read_file(FILENAME, length);
-	printf("%s", buf);
+	char *str1, *str2, *token, *subtoken;
+	char *saveptr1, *saveptr2;
+	int j;
+	char *buf = read_file(FILENAME);
+	if (buf == NULL) {
+		fprintf(stderr, "Failed to get the file.\n");
+		exit(1);
+	}
+	//printf("%s", buf);
+	// OK,next, let's parse the buf 
+	parse_file(buf);
 	return 0;
 	
 }
