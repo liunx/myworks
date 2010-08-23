@@ -34,17 +34,22 @@
 		<Unit filename="getword.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="getword.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="readfile.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="readfile.h" />
 		<Extensions>
 			<envvars />
 			<code_completion />
 			<lib_finder disable_auto="1" />
 			<debugger />
+			<wxsmith version="1">
+				<gui name="wxWidgets" src="" main="" init_handlers="necessary" language="CPP" />
+			</wxsmith>
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

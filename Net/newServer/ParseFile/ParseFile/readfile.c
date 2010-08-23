@@ -60,7 +60,8 @@ void parse_file(char *buf)
 		// funcions in getword
 		str1 = clean_comment(token);
 		str2 = clean_space(str1);
-		printf("The newline is %s\n", str2);
+		if (str2[0] != '\0')
+                        printf("The newline is %s\n", str2);
 		free(str2);
 		free(str1);
 	}
