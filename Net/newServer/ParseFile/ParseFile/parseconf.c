@@ -1,58 +1,86 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include "parseconf.h"
+#include "config.h"
+#include "parseconf.h"
 
-/**
- * Copy from vsftpd-2.3.0 parseconf.c
- * Author: Cris Evans
- */
-char *total_servers = NULL;
-char *total_clients = NULL;
+const char *total_servers;
+const char *total_clients;
 
-static struct parseconf_str_setting {
-	const char *p_setting_name;
-	const char **p_variable;
-}
-parseconf_str_array[] = {
+struct parseconf_str_setting parseconf_str_array[] = {
 	{"Servers", &total_servers},
 	{"Clients", &total_clients},
 	{0, 0}
 };
 
-void str_split_char(const char *str, const char *val, const char *split)
+// str_split_char -- a non-reentry function
+// remember to release it when it's useless
+char **str_split_char(char *str, const char *split)
 {
+	char **pptr = NULL;
+	char *pstr;
+	char *savestr;
 	char *token;
-	char *savevalue;
-	token = strtok_r(str, split, &savevalue);
-	val = strtok_r(NULL, split, &savevalue);
+	int i;
+	pptr = (char **)malloc(sizeof(char **) * array_size);
+	if (pptr == NULL) {
+		fprintf(stderr, "Failed to allocate the room.\n");
+		return NULL;
+	}
+	memset(pptr, 0, sizeof(char **) * array_size);
+
+	for (pstr = str, i = 0; ; i++, pstr = NULL) {
+		token = strtok_r(pstr, split, &savestr);
+		if (token == NULL)
+			break;
+		pptr[i] = token;
+	}
+	pptr[i] = NULL;
+
+	return pptr;
 
 }
 
 void load_setting(const char *p_setting)
 {
+	char **ptr = NULL;
 	const struct parseconf_str_setting *p_str_setting;
 	p_str_setting = parseconf_str_array;
+	int retval;
 
-	// We get the input string in a syle of  x = xxx, 
+	// We get the input string in a syle of  x = xxx,
 	// we need split them out
-
 	while (p_str_setting->p_setting_name != 0) {
-		// if strstr not null, means match
-		if (strstr(p_setting, p_str_setting->p_setting_name)) {
-			str_split_char(p_setting, *(p_str_setting->p_variable), "=");
+		ptr = str_split_char(p_setting, "=");
+		if (ptr == NULL) {
+			fprintf(stderr, "Failed to parse the line.\n");
+			exit(1);
+		}
+		retval = strcmp(p_str_setting->p_setting_name, ptr[0]);
+		if (retval == 0) {
+			const char **p_curr_setting = p_str_setting->p_variable;
+			// We should do a check that if the pointer is not null,
+			// we should release the old one.
+			if (*p_curr_setting != NULL) {
+				free((char *) *p_curr_setting);
+			}
 
+			if (ptr[1] == NULL) {
+				*p_curr_setting = NULL;
+			} else {
+
+				*p_curr_setting = strdup(ptr[1]);
+			}
+
+			free(ptr);
+			return;
 		}
 
+		p_str_setting++;
+
 	}
+	// Do not forget free the room when it useless
+	free(ptr);
 
 }
 
-int main()
-{
-	const buf[] = "Servers=localhost:60000";
-	load_setting(buf);
-
-	return 0;
-
-}

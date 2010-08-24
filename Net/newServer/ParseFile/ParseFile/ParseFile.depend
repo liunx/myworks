@@ -5,13 +5,15 @@
 	<string.h>
 	"getword.h"
 
-1282373402 source:/home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/main.c
+1282638656 source:/home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/main.c
 	<stdio.h>
 	<stdlib.h>
+	<unistd.h>
 	"readfile.h"
 	"getword.h"
+	"config.h"
 
-1282372486 source:/home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/readfile.c
+1282639078 source:/home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/readfile.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -20,8 +22,22 @@
 	<fcntl.h>
 	<unistd.h>
 	"readfile.h"
+	"getword.h"
+	"parseconf.h"
+	"config.h"
 
 1282372684 /home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/getword.h
 
 1282372593 /home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/readfile.h
+
+1282638969 /home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/config.h
+
+1282638952 source:/home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/parseconf.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"parseconf.h"
+	"config.h"
+
+1282637765 /home/liunx/Work/Kernel/myworks/Net/newServer/ParseFile/ParseFile/parseconf.h
 

@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="getword.c" open="1" top="1" tabpos="3">
-		<Cursor position="587" topLine="27" />
+	<File name="config.h" open="1" top="0" tabpos="5">
+		<Cursor position="181" topLine="0" />
+	</File>
+	<File name="getword.c" open="0" top="0" tabpos="3">
+		<Cursor position="1870" topLine="64" />
 	</File>
 	<File name="getword.h" open="0" top="0" tabpos="0">
 		<Cursor position="211" topLine="0" />
 	</File>
 	<File name="main.c" open="1" top="0" tabpos="1">
-		<Cursor position="243" topLine="0" />
+		<Cursor position="260" topLine="0" />
+	</File>
+	<File name="parseconf.c" open="1" top="1" tabpos="4">
+		<Cursor position="157" topLine="0" />
+	</File>
+	<File name="parseconf.h" open="1" top="0" tabpos="3">
+		<Cursor position="178" topLine="0" />
 	</File>
 	<File name="readfile.c" open="1" top="0" tabpos="2">
-		<Cursor position="1442" topLine="38" />
+		<Cursor position="379" topLine="41" />
+	</File>
+	<File name="readfile.h" open="0" top="0" tabpos="0">
+		<Cursor position="159" topLine="0" />
 	</File>
 </CodeBlocks_layout_file>

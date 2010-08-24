@@ -12,6 +12,8 @@
 
 #include "readfile.h"
 #include "getword.h"
+#include "parseconf.h"
+#include "config.h"
 
 // read_file, read full of file contents and
 // store into buf
@@ -47,10 +49,8 @@ char *read_file(const char *filename)
 // parse buf into lines
 void parse_file(char *buf)
 {
-	char *str1, *str2, *token, *subtoken;
-	char *saveptr1, *saveptr2;
-	int i, j;
-	int retval;
+	char *str1, *str2, *token;
+	char *saveptr1;
 	// We need the i to keep loop
 	for (str1 = buf; ; str1 = NULL) {
 		token = strtok_r(str1, "\n", &saveptr1);
@@ -60,8 +60,10 @@ void parse_file(char *buf)
 		// funcions in getword
 		str1 = clean_comment(token);
 		str2 = clean_space(str1);
-		if (str2[0] != '\0')
-                        printf("The newline is %s\n", str2);
+		if (str2[0] != '\0') {
+                        //printf("The newline is %s\n", str2);
+                        load_setting(str2);
+		}
 		free(str2);
 		free(str1);
 	}
