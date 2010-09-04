@@ -14,7 +14,8 @@ Port = 60002
 
 class crashwatcher:
     def __init__(self):
-        print 'init the crashwatcher'
+        #print 'init the crashwatcher'
+        pass
 
     # Bool con_server
     def con_server(self):
@@ -37,16 +38,19 @@ class crashwatcher:
         while True:
             data = self.sock.recv(256)
             if not data:
-                print 'disconnect from remote server'
+                #print 'disconnect from remote server'
                 self.sock.close()
                 break
+        self.SendMail()
 
     # restart the server, if it crashed
     def restart_server(self):
-        os.system('nc -l 60002 &')
+        #print 'Restart the server'
+        os.system('/etc/init.d/lsServer start')
 
     # now, let's set up the watcher
     def do_work(self):
+        self.do_daemon()
         i = 0
         # The big loop, never break out
         while True:
@@ -64,6 +68,23 @@ class crashwatcher:
             #self.restart_server()
             #time.sleep(10)
 
+    # We should run it in background
+    def do_daemon(self):
+        pid = os.fork()
+        if pid > 0:
+            sys.exit(1)
+        os.chdir('/')
+
+    # SendMail -- if crash happened, it should notify the
+    # web master via email
+    # We should fork a subprocess with a general user id 
+    def SendMail(self):
+        pid = os.fork()
+        if pid > 0:
+            return
+        if pid == 0:
+            os.setuid(1001)
+            os.system('/home/enet/Shell/Mail/do_main.sh')
 
 if __name__ == '__main__':
     cw = crashwatcher() 
