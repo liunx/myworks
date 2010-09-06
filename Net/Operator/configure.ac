@@ -2,7 +2,6 @@ AC_PREREQ(2.59)
 AC_INIT([The Operator Server], [0.01], [liunx163@163.com], [operator])
 AM_INIT_AUTOMAKE([1.7.9])
 AC_PROG_CC
-CCFLAGS = -Wall -Werror
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
 		 Makefile

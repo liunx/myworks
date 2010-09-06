@@ -83,3 +83,16 @@ GTAGS
 *.orig
 *~
 \#*#
+
+Net/Operator/autom4te.cache
+*.m4
+compile
+configure
+config.h*
+depcomp
+install-sh
+*.in
+missing
+mkinstalldirs
+
+
