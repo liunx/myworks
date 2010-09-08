@@ -93,5 +93,9 @@ install-sh
 *.in
 missing
 mkinstalldirs
-
+Net/Operator/Makefile
+config.log
+config.status
+Net/Operator/src/Makefile
+Net/Operator/stamp-h1
 
