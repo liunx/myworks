@@ -15,7 +15,6 @@ Net/newServer/ParseFile/ParseFile/obj
 #*.cbp
 #*.layout
 Net/ALP-listings
-.gitignore
 .*
 *.o
 *.o.*
