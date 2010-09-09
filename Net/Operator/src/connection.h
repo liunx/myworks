@@ -20,6 +20,9 @@
 /* useful macro */
 #define CRLF_STR		"\r\n"
 
+typedef apr_status_t (*hash_callback_t)(apr_pollset_t *pollset, apr_hash_t *ht, 
+		      apr_pool_t *mp, const char *param);
+
 typedef struct _serv_ctx_t serv_ctx_t;
 
 /**

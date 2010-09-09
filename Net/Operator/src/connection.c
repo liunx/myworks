@@ -72,6 +72,7 @@ apr_status_t do_listen(apr_pollset_t *pollset, apr_hash_t *ht,
 	apr_pollfd_t pfd = {mp, APR_POLL_SOCKET, APR_POLLIN, 0, {NULL}, NULL};
 	pfd.desc.s = s;
 	apr_pollset_add(pollset, &pfd);
+	free(ptr);
 
 	return APR_SUCCESS;
 	
@@ -108,13 +109,26 @@ int do_accept(apr_pollset_t *pollset, apr_socket_t *lsock, apr_pool_t *mp)
 /**
  * Connect to the remote host
  */
-apr_status_t do_connect(apr_pollset_t *pollset, apr_pool_t *mp, const char *param)
+apr_status_t do_connect(apr_pollset_t *pollset, apr_hash_t *ht, 
+			apr_pool_t *mp, const char *param)
 {
 	apr_sockaddr_t *sa;
 	apr_socket_t *s;
 	apr_status_t rv;
-	
-	rv = apr_sockaddr_info_get(&sa, host, APR_INET, port, 0, mp);
+	char **ptr;
+	int port;
+
+	ptr = str_split_char(param, ":");
+	if (ptr == NULL) {
+		fprintf(stderr, "Get Null param!\n");
+		return APR_EINVAL;
+	}
+	// then convert param
+	port = atoi(ptr[1]);
+	if (port < 0)
+		return APR_EINVAL;
+
+	rv = apr_sockaddr_info_get(&sa, ptr[0], APR_INET, port, 0, mp);
 	if (rv != APR_SUCCESS) {
 	return rv;
 	}
@@ -139,18 +153,21 @@ apr_status_t do_connect(apr_pollset_t *pollset, apr_pool_t *mp, const char *para
 	apr_socket_opt_set(s, APR_SO_NONBLOCK, 1);
 	apr_socket_timeout_set(s, 0); // It'll never block 
 
-		serv_ctx_t *serv_ctx = apr_palloc(mp, sizeof(serv_ctx_t));
-		apr_pollfd_t pfd = { mp, APR_POLL_SOCKET, APR_POLLIN, 0, { NULL }, serv_ctx };
-		pfd.desc.s = s;
+	// Then, add it to hash table. -- "C"lient
+	apr_hash_set(ht, s, APR_HASH_KEY_STRING, "C");
 
-	   	/* at first, we expect requests, so we poll APR_POLLIN event */
-	   	serv_ctx->status = SERV_RECV_REQUEST;
-		serv_ctx->cb_func = recv_req_cb;
-		serv_ctx->recv.is_firstline = TRUE;
-		serv_ctx->mp = mp;
-		apr_pollset_add(pollset, &pfd);
+	serv_ctx_t *serv_ctx = apr_palloc(mp, sizeof(serv_ctx_t));
+	apr_pollfd_t pfd = { mp, APR_POLL_SOCKET, APR_POLLIN, 0, { NULL }, serv_ctx };
+	pfd.desc.s = s;
 
-	*sock = s;
+	/* at first, we expect requests, so we poll APR_POLLIN event */
+	serv_ctx->status = SERV_RECV_REQUEST;
+	serv_ctx->cb_func = recv_req_cb;
+	serv_ctx->recv.is_firstline = TRUE;
+	serv_ctx->mp = mp;
+	apr_pollset_add(pollset, &pfd);
+
+	free(ptr);
 	return APR_SUCCESS;
 }
 
