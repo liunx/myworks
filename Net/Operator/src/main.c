@@ -133,6 +133,8 @@ int main(int argc, const char *argv[])
 		printf("Failed to create the hash table.\n");
 		exit(1);
 	}
+	// Do not forget to create pollset
+	apr_pollset_create(&pollset, DEF_POLLSET_NUM, mp, 0);
 	init_hashtab(conf_ht, mp);
 
 	file = read_file(FILENAME);
