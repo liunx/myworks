@@ -15,6 +15,7 @@
 #include <apr_hash.h>
 #include "connection.h"
 #include "parseconfig.h"
+#include "log.h"
 
 #define FILENAME	"test.conf"
 
