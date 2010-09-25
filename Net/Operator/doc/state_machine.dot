@@ -1,0 +1,8 @@
+digraph state {
+edge [color = green];
+Request -> Accept -> mod_xx1 -> mod_xx2 -> mod_xx3 -> Response [label = "mainline"];
+edge [color = red];
+mod_xx1 -> mod_xx2 [label = "Require mod_xx1 to process"];
+mod_xx2 -> mod_xx3 [label = "Require mod_xx2 to process"];
+mod_xx3 -> Response [label = "Require mod_xx3 to process"];
+}

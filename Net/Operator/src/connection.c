@@ -94,7 +94,7 @@ int do_accept(apr_pollset_t *pollset, apr_socket_t *lsock, apr_pool_t *mp)
 		serv_ctx->recv.is_firstline = TRUE;
 		serv_ctx->mp = mp;
 
-		/**
+	/**
 	 * non-blocking socket. We can't expect that @ns 
 	 * inherits non-blocking mode from @lsock 
 	 */

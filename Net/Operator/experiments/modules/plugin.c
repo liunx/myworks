@@ -20,6 +20,8 @@ int register_plugin(server *srv, plugin *plg, apr_pool_t *mp)
 	// we should allocate a room for the new comer
 	append_items_to_array(srv->slots, plg);
 
+	return 0;
+
 }
 /*
  * unregister_plugin -- remove the plugin

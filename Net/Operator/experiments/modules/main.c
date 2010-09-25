@@ -13,14 +13,26 @@
 #include <apr_dso.h>
 #include "server.h"
 #include "plugin.h"
+#include "core_utils.h"
 
 
 #define ARRAY_INIT_SZ		32
 
-void init(apr_array_header_t *arr, apr_pool_t *mp)
+static void iterate_array(const server *srv)
 {
+	char *name = "Liunx";
+	int i;
+	for (i = 0; i < srv->slots->nelts; i++) {
+		const plugin *plg = ((const plugin **)srv->slots->elts)[i];
+		if (strcmp(plg->name, "Liunx") == 0) {
+			printf("Get the mod!\n");
+			plg->handler((void *)name);
+		}
+
+	}
 
 }
+
 
 /**
  * the Main
@@ -72,9 +84,15 @@ int main(int argc, const char *argv[])
 	}
 	/* Get the plugin */
 	plugin *plg = (plugin *)malloc(sizeof(plugin));
+	core_t *core = (core_t *)malloc(sizeof(core_t));
+	core_init(core);
+	plg->core = core;
 	plugin_init(plg);
 	/* Ok, We get the internals of the plugin */
-	register_plugin(srv, plg, mp);
+	if (register_plugin(srv, plg, mp) < 0)
+		goto error;
+	// Then we can use the plugin
+	iterate_array(srv);
 
 error:
 	apr_dso_unload(dso_h);
