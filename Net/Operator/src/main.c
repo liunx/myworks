@@ -32,9 +32,9 @@ static apr_pollset_t *pollset;
  */
 static void init_hashtab(apr_hash_t *ht, apr_pool_t *mp)
 {
-	apr_hash_set(ht, apr_pstrdup(mp, "Server"), APR_HASH_KEY_STRING,
+	apr_hash_set(ht, apr_pstrdup(mp, "SERVER"), APR_HASH_KEY_STRING,
 		     do_listen);
-	apr_hash_set(ht, apr_pstrdup(mp, "Client"), APR_HASH_KEY_STRING,
+	apr_hash_set(ht, apr_pstrdup(mp, "CLIENT"), APR_HASH_KEY_STRING,
 		     do_connect);
 
 }
@@ -44,7 +44,6 @@ static void init_hashtab(apr_hash_t *ht, apr_pool_t *mp)
 static void load_setting(apr_hash_t *conf_ht, apr_pool_t *mp, char *str)
 {
 	char **ptr = NULL;
-	int retval;
 	// get the hash val and the -val- store the respect function
 	// pointer
 	void *val = NULL;
@@ -77,7 +76,7 @@ static void load_setting(apr_hash_t *conf_ht, apr_pool_t *mp, char *str)
 static void do_init(apr_hash_t *conf_ht, apr_pool_t *mp, char *buf)
 {
 	char *str1, *str2, *token;
-	char *saveptr1;
+	char *saveptr1 = NULL;
 	// We need the i to keep loop
 	for (str1 = buf; ; str1 = NULL) {
 		token = strtok_r(str1, "\n", &saveptr1);
@@ -107,14 +106,6 @@ int main(int argc, const char *argv[])
 	apr_pool_t *mp;
 	// The hash table we use it to record the 
 	// socket
-
-	apr_socket_t *lsock;/* listening socket */
-	// add a second server 
-	apr_socket_t *lsock2;
-
-	/* Let's add the connect socket */
-	apr_socket_t *csock;
-
 	apr_int32_t num;
 	const apr_pollfd_t *ret_pfd;
 
@@ -156,6 +147,7 @@ int main(int argc, const char *argv[])
 		     */
 		    hsock = ret_pfd[i].desc.s;
 		    val = apr_hash_get(ht, hsock, APR_HASH_KEY_STRING);
+		    printf("VAL == %s\n", val);
 		    // if NULL, the sock does not exist in the table
 		    if (val) {
 			    if (!apr_strnatcmp(val, "S")) {
@@ -163,6 +155,7 @@ int main(int argc, const char *argv[])
 		     		 * we accepted a new connection 
 		     		 */
                     		do_accept(pollset, hsock, mp);
+				printf("Get a new remote connection!\n");
 			    } else if (!apr_strnatcmp(val, "C")) {
 				printf("Get response from remote server!\n");
                     		serv_ctx_t *serv_ctx = ret_pfd[i].client_data;
@@ -176,11 +169,12 @@ int main(int argc, const char *argv[])
 			    }
 
 		    } else {
-                    serv_ctx_t *serv_ctx = ret_pfd[i].client_data;
-                    socket_callback_t cb_func = serv_ctx->cb_func;
+			    printf("Unkown connection!\n");
+                    		serv_ctx_t *serv_ctx = ret_pfd[i].client_data;
+                    		socket_callback_t cb_func = serv_ctx->cb_func;
 
-                    cb_func(serv_ctx, pollset, ret_pfd[i].desc.s);
-                }
+                    		cb_func(serv_ctx, pollset, ret_pfd[i].desc.s);
+		    }
             }
         }
     }

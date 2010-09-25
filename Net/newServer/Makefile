@@ -13,7 +13,7 @@ LDLIBS=$(shell ${APR_CONFIG} --libs --link-ld)
 
 .PHONY: all clean
 
-all: newServer server client epoll_testServer
+all: newServer server client epoll_testServer MultiServers
 
 
 newServer:
